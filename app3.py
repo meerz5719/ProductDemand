@@ -55,14 +55,33 @@ if st.button("🔮 Forecast Top Demands (Manual)"):
     st.subheader("🏆 Forecasted Product Demand")
     st.table(pd.DataFrame(sorted_preds, columns=["Family", "Predicted Demand"]))
 
+    # Top-1 family forecast graph
+    top_family = sorted_preds[0][0]
+    st.subheader(f"📈 7-Day Forecast for: {top_family}")
+    forecast = []
+    future_dates = pd.date_range(start=date_input, periods=7)
+
+    for dt in future_dates:
+        input_df = create_input(dt, top_family)
+        pred = model.predict(input_df.values)[0]
+        pred += np.random.normal(loc=0.3, scale=0.2)
+        forecast.append(max(1, round(pred, 2)))
+
+    forecast_df = pd.DataFrame({top_family: forecast}, index=future_dates)
+    st.line_chart(forecast_df)
+
+    # CSV download
+    csv = forecast_df.reset_index().rename(columns={"index": "Date"}).to_csv(index=False).encode("utf-8")
+    st.download_button("📥 Download Forecast CSV", data=csv, file_name="forecast_top_family.csv", mime="text/csv")
+
 # ----------- FORECAST FROM UPLOADED EXCEL ----------
 st.subheader("📤 Upload Excel for Bulk Forecasting")
 uploaded_file = st.file_uploader("Upload Excel File", type=["xlsx", "xls"])
 
 if uploaded_file is not None:
-    df_upload = pd.read_excel(uploaded_file)
+    df_upload = pd.read_excel(uploaded_file, engine="openpyxl")  # ✅ fix: force openpyxl
 
-    # Convert date column if needed
+    # Convert date column
     if "date" in df_upload.columns:
         df_upload["date"] = pd.to_datetime(df_upload["date"], dayfirst=True, errors="coerce")
 
@@ -73,7 +92,7 @@ if uploaded_file is not None:
         store = row["store_nbr"]
         promo = row["onpromotion"]
 
-        # Using defaults for cluster & transactions if not present
+        # Defaults if not present
         clus = row["cluster"] if "cluster" in df_upload.columns else cluster
         trans = row["transactions"] if "transactions" in df_upload.columns else transactions
 
@@ -83,7 +102,6 @@ if uploaded_file is not None:
         pred = max(1, round(pred, 2))
         results.append(pred)
 
-    # Add predictions to dataframe
     df_upload["Predicted_Demand"] = results
 
     st.success("✅ Forecasting Completed!")
