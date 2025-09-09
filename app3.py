@@ -6,80 +6,98 @@ import joblib
 from datetime import datetime
 
 
+
 # ---------- CUSTOM STYLING ----------
 st.markdown(
     """
     <style>
-    /* Background */
+    /* -------- Background -------- */
     .stApp {
-        background-color: #f9fafb;
-        background-image: linear-gradient(to right, #f0f4f8, #ffffff);
-    }
-
-    /* Title */
-    h1 {
+        background: linear-gradient(120deg, #f0f4f8, #ffffff, #f9fafb);
+        background-attachment: fixed;
         color: #2C3E50;
         font-family: 'Segoe UI', sans-serif;
-        text-align: center;
     }
 
-    /* Subheaders */
+    /* -------- Titles -------- */
+    h1 {
+        color: #2C3E50;
+        font-family: 'Trebuchet MS', sans-serif;
+        font-weight: bold;
+        text-align: center;
+        padding: 10px;
+    }
     h2, h3 {
         color: #1F618D;
         font-family: 'Trebuchet MS', sans-serif;
+        font-weight: bold;
+        margin-top: 20px;
     }
 
-    /* Sidebar */
+    /* -------- Sidebar -------- */
     section[data-testid="stSidebar"] {
-        background-color: #2E4053;
-        color: white;
+        background: linear-gradient(180deg, #2E4053, #1B2631);
+        color: #ECF0F1;
     }
     section[data-testid="stSidebar"] label {
         color: #ECF0F1 !important;
+        font-weight: bold;
     }
 
-    /* Tables */
+    /* -------- Tables -------- */
     table {
         border-collapse: collapse;
         width: 100%;
     }
     th {
-        background-color: #1ABC9C !important;
+        background-color: #16A085 !important;
         color: white !important;
         font-family: 'Segoe UI', sans-serif;
+        text-align: center !important;
+        padding: 8px;
     }
     td {
         background-color: #ECF0F1;
         font-family: 'Segoe UI', sans-serif;
+        text-align: center;
+        padding: 6px;
     }
 
-    /* Buttons */
+    /* -------- Buttons -------- */
     div.stButton > button {
         background-color: #3498DB;
         color: white;
         font-size: 16px;
-        border-radius: 8px;
-        padding: 8px 16px;
+        border-radius: 10px;
+        padding: 10px 18px;
+        transition: 0.3s;
+        border: none;
     }
     div.stButton > button:hover {
         background-color: #1ABC9C;
         color: white;
     }
 
-    /* Download button */
+    /* -------- Download Button -------- */
     .stDownloadButton > button {
         background-color: #27AE60;
         color: white;
         font-weight: bold;
-        border-radius: 8px;
+        border-radius: 10px;
+        padding: 8px 16px;
+        border: none;
+        transition: 0.3s;
     }
     .stDownloadButton > button:hover {
         background-color: #229954;
+        color: white;
     }
     </style>
     """,
     unsafe_allow_html=True
 )
+
+
 
 
 
@@ -212,3 +230,4 @@ if uploaded_file is not None:
     # Download
     csv = df_upload.to_csv(index=False).encode("utf-8")
     st.download_button("Download Predictions as CSV", data=csv, file_name="bulk_forecast.csv", mime="text/csv")
+
