@@ -1,8 +1,87 @@
+#new app3.py with test data upload
 import streamlit as st
 import pandas as pd
 import numpy as np
 import joblib
 from datetime import datetime
+
+
+# ---------- CUSTOM STYLING ----------
+st.markdown(
+    """
+    <style>
+    /* Background */
+    .stApp {
+        background-color: #f9fafb;
+        background-image: linear-gradient(to right, #f0f4f8, #ffffff);
+    }
+
+    /* Title */
+    h1 {
+        color: #2C3E50;
+        font-family: 'Segoe UI', sans-serif;
+        text-align: center;
+    }
+
+    /* Subheaders */
+    h2, h3 {
+        color: #1F618D;
+        font-family: 'Trebuchet MS', sans-serif;
+    }
+
+    /* Sidebar */
+    section[data-testid="stSidebar"] {
+        background-color: #2E4053;
+        color: white;
+    }
+    section[data-testid="stSidebar"] label {
+        color: #ECF0F1 !important;
+    }
+
+    /* Tables */
+    table {
+        border-collapse: collapse;
+        width: 100%;
+    }
+    th {
+        background-color: #1ABC9C !important;
+        color: white !important;
+        font-family: 'Segoe UI', sans-serif;
+    }
+    td {
+        background-color: #ECF0F1;
+        font-family: 'Segoe UI', sans-serif;
+    }
+
+    /* Buttons */
+    div.stButton > button {
+        background-color: #3498DB;
+        color: white;
+        font-size: 16px;
+        border-radius: 8px;
+        padding: 8px 16px;
+    }
+    div.stButton > button:hover {
+        background-color: #1ABC9C;
+        color: white;
+    }
+
+    /* Download button */
+    .stDownloadButton > button {
+        background-color: #27AE60;
+        color: white;
+        font-weight: bold;
+        border-radius: 8px;
+    }
+    .stDownloadButton > button:hover {
+        background-color: #229954;
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
+
 
 # Load trained model and expected feature list
 model = joblib.load("forecast_model.pkl")
@@ -10,7 +89,7 @@ expected_features = joblib.load("expected_features.pkl")
 
 # Streamlit UI
 st.set_page_config(page_title="Forecast Demo", layout="centered")
-st.title("📦 Simulated Product Demand Forecasting")
+st.title("Simulated Product Demand Forecasting")
 
 # Sidebar input
 st.sidebar.header("Manual Input Parameters")
@@ -41,7 +120,7 @@ def create_input(date_val, fam, store=store_nbr, promo=onpromotion, trans=transa
     return df[expected_features].astype(np.float32)
 
 # ----------- FORECAST FROM MANUAL INPUT -----------
-if st.button("🔮 Forecast Top Demands (Manual)"):
+if st.button("Forecast Top Demands (Manual parameters)"):
     predictions = []
     for fam in families:
         input_df = create_input(date_input, fam)
@@ -52,12 +131,12 @@ if st.button("🔮 Forecast Top Demands (Manual)"):
 
     # Rank and display
     sorted_preds = sorted(predictions, key=lambda x: x[1], reverse=True)
-    st.subheader("🏆 Forecasted Product Demand")
+    st.subheader("Forecasted Product Demand")
     st.table(pd.DataFrame(sorted_preds, columns=["Family", "Predicted Demand"]))
 
     # Top-1 family forecast graph
     top_family = sorted_preds[0][0]
-    st.subheader(f"📈 7-Day Forecast for: {top_family}")
+    st.subheader(f"7-Day Forecast for: {top_family}")
     forecast = []
     future_dates = pd.date_range(start=date_input, periods=7)
 
@@ -72,13 +151,13 @@ if st.button("🔮 Forecast Top Demands (Manual)"):
 
     # CSV download
     csv = forecast_df.reset_index().rename(columns={"index": "Date"}).to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Download Forecast CSV", data=csv, file_name="forecast_top_family.csv", mime="text/csv")
+    st.download_button("Download Forecast CSV", data=csv, file_name="forecast_top_family.csv", mime="text/csv")
 
 
 
 
 # ----------- FORECAST FROM UPLOADED FILE ----------
-st.subheader("📤 Upload Excel/CSV for Bulk Forecasting")
+st.subheader("Upload Excel/CSV for Bulk Forecasting")
 uploaded_file = st.file_uploader("Upload File", type=["xlsx", "xls", "csv"])
 
 if uploaded_file is not None:
@@ -127,9 +206,9 @@ if uploaded_file is not None:
     preds = [max(1, round(p + np.random.normal(loc=0.3, scale=0.2), 2)) for p in preds]
     df_upload["Predicted_Demand"] = preds
 
-    st.success("✅ Bulk Forecasting Completed!")
+    st.success("Bulk Forecasting for Uploaded Files")
     st.dataframe(df_upload)
 
     # Download
     csv = df_upload.to_csv(index=False).encode("utf-8")
-    st.download_button("📥 Download Predictions CSV", data=csv, file_name="bulk_forecast.csv", mime="text/csv")
+    st.download_button("Download Predictions as CSV", data=csv, file_name="bulk_forecast.csv", mime="text/csv")
